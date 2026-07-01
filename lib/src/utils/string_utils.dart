@@ -1,4 +1,6 @@
+/// Helper utility class for string manipulation and case conversions.
 class StringUtils {
+  StringUtils._();
   /// Converts input string to PascalCase (e.g., "user_profile" -> "UserProfile")
   static String toPascalCase(String input) {
     if (input.isEmpty) return '';

@@ -1,6 +1,8 @@
 import 'dart:io';
 
+/// Helper utility class for performing synchronous file operations.
 class FileHelper {
+  FileHelper._();
   /// Writes [content] to the [path], creating any parent directories.
   static void writeFile(String path, String content) {
     final file = File(path);
