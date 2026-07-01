@@ -1,3 +1,8 @@
+## 1.0.1
+
+* Fix missing dartdoc comments for public API symbols.
+* Add code example in example/example.dart.
+
 ## 1.0.0
 
 * Initial release of Clean Architecture Generator.
