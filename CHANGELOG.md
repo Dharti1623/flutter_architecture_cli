@@ -1,3 +1,7 @@
+## 1.0.3
+
+* Add Medium blog tutorial link to README.md.
+
 ## 1.0.2
 
 * Update README.md with dev_dependency setup guide and future roadmap goals.

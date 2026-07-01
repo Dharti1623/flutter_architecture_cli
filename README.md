@@ -6,6 +6,9 @@
 
 A production-grade command-line tool designed to generate and scale clean architecture codebases in Flutter. It eliminates repetitive setup, enforcing a modular, highly scalable, and team-friendly project structure powered by RxDart streams and Provider.
 
+> [!TIP]
+> Read the complete setup and detailed architectural guide on Medium: **[Stop Writing Boilerplate: Scaffold a Flutter Clean Architecture App in 60 Seconds!](https://medium.com/@dharti6196/stop-writing-boilerplate-scaffold-a-flutter-clean-architecture-app-in-60-seconds-4b1df80397b0)**
+
 ---
 
 ## Table of Contents
