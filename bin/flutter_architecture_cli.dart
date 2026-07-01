@@ -1,17 +1,17 @@
 import 'dart:io';
 import 'package:args/command_runner.dart';
-import 'package:clean_architecture_generator/src/commands/create_app_command.dart';
-import 'package:clean_architecture_generator/src/commands/create_screen_command.dart';
-import 'package:clean_architecture_generator/src/commands/create_feature_command.dart';
-import 'package:clean_architecture_generator/src/commands/create_model_command.dart';
-import 'package:clean_architecture_generator/src/commands/create_repository_command.dart';
-import 'package:clean_architecture_generator/src/commands/create_datasource_command.dart';
-import 'package:clean_architecture_generator/src/commands/create_service_command.dart';
-import 'package:clean_architecture_generator/src/commands/change_bundle_id_command.dart';
+import 'package:flutter_architecture_cli/src/commands/create_app_command.dart';
+import 'package:flutter_architecture_cli/src/commands/create_screen_command.dart';
+import 'package:flutter_architecture_cli/src/commands/create_feature_command.dart';
+import 'package:flutter_architecture_cli/src/commands/create_model_command.dart';
+import 'package:flutter_architecture_cli/src/commands/create_repository_command.dart';
+import 'package:flutter_architecture_cli/src/commands/create_datasource_command.dart';
+import 'package:flutter_architecture_cli/src/commands/create_service_command.dart';
+import 'package:flutter_architecture_cli/src/commands/change_bundle_id_command.dart';
 
 void main(List<String> arguments) async {
   final runner = CommandRunner(
-    'clean_architecture_generator',
+    'flutter_architecture_cli',
     'CLI tool to generate clean architecture boilerplate for Flutter applications.',
   )
     ..addCommand(CreateAppCommand())

@@ -35,7 +35,7 @@ class CreateRepositoryCommand extends Command {
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the repository name. Usage: clean_architecture_generator create_repository <name>');
+      print('Error: Please specify the repository name. Usage: flutter_architecture_cli create_repository <name>');
       return;
     }
 

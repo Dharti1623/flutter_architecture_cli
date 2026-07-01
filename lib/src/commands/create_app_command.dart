@@ -23,7 +23,7 @@ class CreateAppCommand extends Command {
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the app name. Usage: clean_architecture_generator create <app_name>');
+      print('Error: Please specify the app name. Usage: flutter_architecture_cli create <app_name>');
       return;
     }
 

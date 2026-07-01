@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:clean_architecture_generator/src/utils/string_utils.dart';
+import 'package:flutter_architecture_cli/src/utils/string_utils.dart';
 
 void main() {
   group('StringUtils Tests', () {

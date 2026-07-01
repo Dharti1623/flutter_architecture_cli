@@ -1,6 +1,6 @@
-# Clean Architecture Generator
+# Flutter Architecture CLI
 
-[![pub package](https://img.shields.io/pub/v/clean_architecture_generator.svg)](https://pub.dev/packages/clean_architecture_generator)
+[![pub package](https://img.shields.io/pub/v/flutter_architecture_cli.svg)](https://pub.dev/packages/flutter_architecture_cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform Support](https://img.shields.io/badge/platform-android%20%7C%20ios%20%7C%20macos%20%7C%20web%20%7C%20linux%20%7C%20windows-blue.svg)](#)
 
@@ -78,7 +78,7 @@ lib/
 Activate the package globally to make the command available system-wide:
 
 ```bash
-dart pub global activate clean_architecture_generator
+dart pub global activate flutter_architecture_cli
 ```
 
 ---
@@ -89,58 +89,58 @@ dart pub global activate clean_architecture_generator
 Generate a fully bootstrapped Flutter project matching the architecture style:
 
 ```bash
-clean_architecture_generator create <app_name>
+flutter_architecture_cli create <app_name>
 ```
 *Example:*
 ```bash
-clean_architecture_generator create my_awesome_app
+flutter_architecture_cli create my_awesome_app
 ```
 
 ### 2. Creating a Feature
 Instantly scaffold a complete feature directory with its nested folders (`bloc`, `data_source`, `mapper`, `model/request`, `model/response`, `model/ui_entity`, `presentation/view`, `presentation/widget`, `repository`, `state`):
 
 ```bash
-clean_architecture_generator create_feature <feature_name>
+flutter_architecture_cli create_feature <feature_name>
 ```
 *Example:*
 ```bash
-clean_architecture_generator create_feature products
+flutter_architecture_cli create_feature products
 ```
 
 ### 3. Creating a Screen
 Add a new screen to the presentation layer of a specific feature:
 
 ```bash
-clean_architecture_generator create_screen <screen_name> -f <feature_name>
+flutter_architecture_cli create_screen <screen_name> -f <feature_name>
 ```
 *Example:*
 ```bash
-clean_architecture_generator create_screen product_detail -f products
+flutter_architecture_cli create_screen product_detail -f products
 ```
 
 ### 4. Creating Models
 Generate model response DTOs and matching UI Entity classes:
 
 ```bash
-clean_architecture_generator create_model <model_name> -f <feature_name>
+flutter_architecture_cli create_model <model_name> -f <feature_name>
 ```
 *Example:*
 ```bash
-clean_architecture_generator create_model category -f products
+flutter_architecture_cli create_model category -f products
 ```
 
 ### 5. Creating Data Sources
 Generate a data source class in the specified feature:
 
 ```bash
-clean_architecture_generator create_datasource <name> -f <feature_name>
+flutter_architecture_cli create_datasource <name> -f <feature_name>
 ```
 
 ### 6. Creating Repositories
 Generate a repository class to bridge your data source and domain layer:
 
 ```bash
-clean_architecture_generator create_repository <name> -f <feature_name>
+flutter_architecture_cli create_repository <name> -f <feature_name>
 ```
 
 ---
@@ -161,7 +161,7 @@ The generated structure focuses on a single directional data flow:
 
 Contributions are welcome! If you want to suggest an improvement, report a bug, or add new command options:
 
-1. **Fork** the repository: `https://github.com/Dharti1623/clean_architecture_generator`
+1. **Fork** the repository: `https://github.com/Dharti1623/flutter_architecture_cli`
 2. Create your feature branch: `git checkout -b feature/amazing-feature`
 3. Commit your changes: `git commit -m 'Add amazing feature'`
 4. Push to the branch: `git push origin feature/amazing-feature`
@@ -175,4 +175,3 @@ If this CLI generator saved you time and made your Flutter development easier, c
 
 * ☕ **Buy Me A Coffee**: [https://buymeacoffee.com/dhartichauhan](https://buymeacoffee.com/dhartichauhan)
 * ⭐ **Star the Repository**: Show your support by giving our Github repository a star!
-

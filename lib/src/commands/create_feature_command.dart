@@ -29,7 +29,7 @@ class CreateFeatureCommand extends Command {
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the feature name. Usage: clean_architecture_generator create_feature <feature_name>');
+      print('Error: Please specify the feature name. Usage: flutter_architecture_cli create_feature <feature_name>');
       return;
     }
 

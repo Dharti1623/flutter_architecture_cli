@@ -35,7 +35,7 @@ class CreateDataSourceCommand extends Command {
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the data source name. Usage: clean_architecture_generator create_datasource <name>');
+      print('Error: Please specify the data source name. Usage: flutter_architecture_cli create_datasource <name>');
       return;
     }
 

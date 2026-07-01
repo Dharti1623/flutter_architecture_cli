@@ -23,7 +23,7 @@ class CreateModelCommand extends Command {
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the model name. Usage: clean_architecture_generator create_model <model_name>');
+      print('Error: Please specify the model name. Usage: flutter_architecture_cli create_model <model_name>');
       return;
     }
 

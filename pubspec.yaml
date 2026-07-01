@@ -1,7 +1,7 @@
-name: clean_architecture_generator
+name: flutter_architecture_cli
 description: A command-line tool to generate a production-ready clean architecture in Flutter using RxDart and Provider.
 version: 1.0.0
-repository: https://github.com/Dharti1623/clean_architecture_generator
+repository: https://github.com/Dharti1623/flutter_architecture_cli
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
@@ -15,4 +15,4 @@ dev_dependencies:
   test: ^1.25.0
 
 executables:
-  clean_architecture_generator: clean_architecture_generator
+  flutter_architecture_cli: flutter_architecture_cli

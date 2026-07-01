@@ -15,7 +15,7 @@ class ChangeBundleIdCommand extends Command {
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the new bundle ID. Usage: clean_architecture_generator change_bundle_id <new_bundle_id>');
+      print('Error: Please specify the new bundle ID. Usage: flutter_architecture_cli change_bundle_id <new_bundle_id>');
       return;
     }
 

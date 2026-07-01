@@ -35,7 +35,7 @@ class CreateScreenCommand extends Command {
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the screen name. Usage: clean_architecture_generator create_screen <screen_name>');
+      print('Error: Please specify the screen name. Usage: flutter_architecture_cli create_screen <screen_name>');
       return;
     }
 
