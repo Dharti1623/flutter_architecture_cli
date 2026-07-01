@@ -1,3 +1,7 @@
+## 1.0.2
+
+* Update README.md with dev_dependency setup guide and future roadmap goals.
+
 ## 1.0.1
 
 * Fix missing dartdoc comments for public API symbols.

@@ -9,9 +9,9 @@ A production-grade command-line tool designed to generate and scale clean archit
 ---
 
 ## Table of Contents
+- [Quick Start](#quick-start)
 - [Features](#features)
 - [Folder Structure](#folder-structure)
-- [Installation](#installation)
 - [Usage Guide](#usage-guide)
   - [1. Creating a New Application](#1-creating-a-new-application)
   - [2. Creating a Feature](#2-creating-a-feature)
@@ -22,6 +22,32 @@ A production-grade command-line tool designed to generate and scale clean archit
 - [Architecture Flow](#architecture-flow)
 - [Contributing](#contributing)
 - [Support & Donations](#support--donations)
+
+---
+
+## Quick Start
+
+This package is a **Command Line Interface (CLI) tool**. You do **not** need to add it to your project's `pubspec.yaml` dependencies. 
+
+Simply activate it globally on your machine:
+
+```bash
+dart pub global activate flutter_architecture_cli
+```
+
+Once activated, you can run all commands directly from your terminal using the `flutter_architecture_cli` command.
+
+### Alternative: Add as a Dev Dependency
+If you prefer not to install it globally, you can add it as a development dependency inside your Flutter project:
+
+```bash
+flutter pub add --dev flutter_architecture_cli
+```
+
+Then, run commands inside your project folder using `dart run`:
+```bash
+dart run flutter_architecture_cli <command>
+```
 
 ---
 
@@ -69,16 +95,6 @@ lib/
 │       ├── repository/   # user_repository.dart
 │       └── state/        # user_state.dart & user_provider.dart
 └── main.dart             # Application root bootstrapper
-```
-
----
-
-## Installation
-
-Activate the package globally to make the command available system-wide:
-
-```bash
-dart pub global activate flutter_architecture_cli
 ```
 
 ---
@@ -135,12 +151,20 @@ Generate a data source class in the specified feature:
 ```bash
 flutter_architecture_cli create_datasource <name> -f <feature_name>
 ```
+*Example:*
+```bash
+flutter_architecture_cli create_datasource product -f products
+```
 
 ### 6. Creating Repositories
 Generate a repository class to bridge your data source and domain layer:
 
 ```bash
 flutter_architecture_cli create_repository <name> -f <feature_name>
+```
+*Example:*
+```bash
+flutter_architecture_cli create_repository product -f products
 ```
 
 ---
@@ -154,6 +178,16 @@ The generated structure focuses on a single directional data flow:
 3. **Repository**: Requests data from `DataSource` and runs the mapped results up to the Bloc layer.
 4. **Bloc**: Standardizes UI state management by converting repository streams into `BaseUiState` (Loading -> Completed/Error) emitted via `BehaviorSubject`.
 5. **Presentation (View)**: Listens to the Bloc subjects using `StreamBuilder` and renders loading, success, or error screens automatically.
+
+---
+
+## Roadmap / Future Goals
+
+We plan to expand the CLI tool to support multiple popular state management architectures. Future updates will include flags to generate project structures for:
+* **flutter_bloc**: Support for Bloc/Cubit architectures.
+* **Riverpod**: Support for modern declarative state management and providers.
+* **GetX**: Support for lightweight and high-performance reactive programming.
+* **Custom templates**: Ability to load user-defined boilerplate structures.
 
 ---
 

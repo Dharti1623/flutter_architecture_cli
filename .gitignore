@@ -20,7 +20,3 @@ Thumbs.db
 # Private files / environment variables
 .env
 .env.*
-
-# Generated test apps
-test_app_dir/
-test_savsani_app/
