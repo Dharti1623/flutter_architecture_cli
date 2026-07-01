@@ -1,0 +1,22 @@
+# https://dart.dev/guides/libraries/private-files
+
+# Dependency directories
+.dart_tool/
+.packages
+.pub/
+build/
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Private files / environment variables
+.env
+.env.*
