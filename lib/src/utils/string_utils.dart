@@ -1,11 +1,14 @@
 /// Helper utility class for string manipulation and case conversions.
 class StringUtils {
   StringUtils._();
+
   /// Converts input string to PascalCase (e.g., "user_profile" -> "UserProfile")
   static String toPascalCase(String input) {
     if (input.isEmpty) return '';
     final words = _splitWords(input);
-    return words.map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase()).join('');
+    return words
+        .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+        .join('');
   }
 
   /// Converts input string to camelCase (e.g., "user_profile" -> "userProfile")
@@ -32,9 +35,6 @@ class StringUtils {
   /// Helper to split string into list of words by looking at capitals, spaces, dashes, and underscores.
   static List<String> _splitWords(String input) {
     final exp = RegExp(r'(?<=[a-z])(?=[A-Z])|[_.\-\s]+');
-    return input
-        .split(exp)
-        .where((w) => w.trim().isNotEmpty)
-        .toList();
+    return input.split(exp).where((w) => w.trim().isNotEmpty).toList();
   }
 }

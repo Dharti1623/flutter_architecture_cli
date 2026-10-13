@@ -1,3 +1,16 @@
+## 1.0.4
+
+* Add full FVM (Flutter Version Management) support across all commands with `--fvm` and `--fvm-version` flags.
+* Add smart auto-detection for FVM when `flutter` is missing from system PATH or in FVM workspaces.
+* Auto-configure `.fvm/flutter_sdk` in `.gitignore` and `.vscode/settings.json` for newly created projects.
+* Automatically include `flutter_architecture_cli: ^1.0.4` in `dev_dependencies` of newly generated projects.
+* Add project root directory auto-detection so all commands work smoothly even from subdirectories.
+* Add smart data source auto-detection in `create_repository` command.
+* Support Kotlin DSL (`build.gradle.kts`) in `change_bundle_id`.
+* Fix smoke test generation so `flutter test` succeeds out of the box in new projects.
+* Fix `BaseUiState.isError()` to prevent uninitialized states from evaluating as errors.
+* Make `AppLocalizations` null-safe with fallback in `AppText` for widget tests.
+
 ## 1.0.3
 
 * Add Medium blog tutorial link to README.md.

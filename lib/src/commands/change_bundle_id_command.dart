@@ -1,13 +1,15 @@
 import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
+import '../utils/file_helper.dart';
 
 class ChangeBundleIdCommand extends Command {
   @override
   final String name = 'change_bundle_id';
 
   @override
-  final String description = 'Changes the Android package name and iOS bundle identifier in the current project.';
+  final String description =
+      'Changes the Android package name and iOS bundle identifier in the current project.';
 
   ChangeBundleIdCommand();
 
@@ -15,20 +17,23 @@ class ChangeBundleIdCommand extends Command {
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the new bundle ID. Usage: flutter_architecture_cli change_bundle_id <new_bundle_id>');
+      print(
+          'Error: Please specify the new bundle ID. Usage: flutter_architecture_cli change_bundle_id <new_bundle_id>');
       return;
     }
 
     final newBundleId = rest.first.trim();
-    final bundleRegExp = RegExp(r'^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$');
+    final bundleRegExp =
+        RegExp(r'^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$');
     if (!bundleRegExp.hasMatch(newBundleId)) {
-      print('Error: Invalid bundle identifier/package name format. E.g. com.example.app');
+      print(
+          'Error: Invalid bundle identifier/package name format. E.g. com.example.app');
       return;
     }
 
     print('Changing bundle identifier to "$newBundleId"...');
 
-    final projectDir = Directory.current.path;
+    final projectDir = FileHelper.findProjectRoot();
 
     // 1. Update Android configurations
     _updateAndroid(projectDir, newBundleId);
@@ -40,7 +45,8 @@ class ChangeBundleIdCommand extends Command {
   }
 
   void _updateAndroid(String projectDir, String newBundleId) {
-    final buildGradleFile = File(p.join(projectDir, 'android/app/build.gradle'));
+    final buildGradleFile =
+        File(p.join(projectDir, 'android/app/build.gradle'));
     if (buildGradleFile.existsSync()) {
       print('Updating android/app/build.gradle...');
       var content = buildGradleFile.readAsStringSync();
@@ -57,7 +63,24 @@ class ChangeBundleIdCommand extends Command {
       buildGradleFile.writeAsStringSync(content);
     }
 
-    final manifestFile = File(p.join(projectDir, 'android/app/src/main/AndroidManifest.xml'));
+    final buildGradleKtsFile =
+        File(p.join(projectDir, 'android/app/build.gradle.kts'));
+    if (buildGradleKtsFile.existsSync()) {
+      print('Updating android/app/build.gradle.kts...');
+      var content = buildGradleKtsFile.readAsStringSync();
+      content = content.replaceAll(
+        RegExp(r'''applicationId\s*=\s*["'][a-zA-Z0-9_\.]+["']'''),
+        'applicationId = "$newBundleId"',
+      );
+      content = content.replaceAll(
+        RegExp(r'''namespace\s*=\s*["'][a-zA-Z0-9_\.]+["']'''),
+        'namespace = "$newBundleId"',
+      );
+      buildGradleKtsFile.writeAsStringSync(content);
+    }
+
+    final manifestFile =
+        File(p.join(projectDir, 'android/app/src/main/AndroidManifest.xml'));
     if (manifestFile.existsSync()) {
       print('Updating android/app/src/main/AndroidManifest.xml...');
       var content = manifestFile.readAsStringSync();
@@ -69,7 +92,8 @@ class ChangeBundleIdCommand extends Command {
     }
 
     // Update MainActivity package & folder layout
-    final kotlinDir = Directory(p.join(projectDir, 'android/app/src/main/kotlin'));
+    final kotlinDir =
+        Directory(p.join(projectDir, 'android/app/src/main/kotlin'));
     final javaDir = Directory(p.join(projectDir, 'android/app/src/main/java'));
 
     if (kotlinDir.existsSync()) {
@@ -80,13 +104,15 @@ class ChangeBundleIdCommand extends Command {
     }
   }
 
-  void _renameMainActivity(Directory baseDir, String newBundleId, String extension) {
+  void _renameMainActivity(
+      Directory baseDir, String newBundleId, String extension) {
     // Find MainActivity file recursively
     File? mainActivityFile;
     try {
       final entities = baseDir.listSync(recursive: true);
       for (final entity in entities) {
-        if (entity is File && p.basename(entity.path) == 'MainActivity$extension') {
+        if (entity is File &&
+            p.basename(entity.path) == 'MainActivity$extension') {
           mainActivityFile = entity;
           break;
         }
@@ -99,7 +125,8 @@ class ChangeBundleIdCommand extends Command {
     var content = mainActivityFile.readAsStringSync();
 
     // Find old package name from file contents
-    final packageMatch = RegExp(r'package\s+([a-zA-Z0-9_\.]+);?').firstMatch(content);
+    final packageMatch =
+        RegExp(r'package\s+([a-zA-Z0-9_\.]+);?').firstMatch(content);
     if (packageMatch == null) return;
 
     final oldPackageName = packageMatch.group(1)!;
@@ -126,7 +153,8 @@ class ChangeBundleIdCommand extends Command {
 
       // Clean up old empty directories recursively up to baseDir
       var parent = mainActivityFile.parent;
-      while (parent.path != baseDir.path && parent.path.startsWith(baseDir.path)) {
+      while (
+          parent.path != baseDir.path && parent.path.startsWith(baseDir.path)) {
         try {
           if (parent.listSync().isEmpty) {
             print('Removing empty old package directory: ${parent.path}');
@@ -143,7 +171,8 @@ class ChangeBundleIdCommand extends Command {
   }
 
   void _updateIos(String projectDir, String newBundleId) {
-    final pbxprojFile = File(p.join(projectDir, 'ios/Runner.xcodeproj/project.pbxproj'));
+    final pbxprojFile =
+        File(p.join(projectDir, 'ios/Runner.xcodeproj/project.pbxproj'));
     if (pbxprojFile.existsSync()) {
       print('Updating ios/Runner.xcodeproj/project.pbxproj...');
       var content = pbxprojFile.readAsStringSync();

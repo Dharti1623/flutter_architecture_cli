@@ -3,19 +3,28 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 import '../utils/file_helper.dart';
 import '../utils/string_utils.dart';
+import '../utils/fvm_helper.dart';
 
 class CreateModelCommand extends Command {
   @override
   final String name = 'create_model';
 
   @override
-  final String description = 'Generates a new data model and DTO in the project.';
+  final String description =
+      'Generates a new data model and DTO in the project.';
 
   CreateModelCommand() {
     argParser.addOption(
       'feature',
       abbr: 'f',
-      help: 'The target feature folder inside lib/src/ where the model should be created.',
+      help:
+          'The target feature folder inside lib/src/ where the model should be created.',
+    );
+    argParser.addFlag(
+      'fvm',
+      negatable: false,
+      help:
+          'Use FVM (Flutter Version Management) when formatting generated code.',
     );
   }
 
@@ -23,16 +32,21 @@ class CreateModelCommand extends Command {
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the model name. Usage: flutter_architecture_cli create_model <model_name>');
+      print(
+          'Error: Please specify the model name. Usage: flutter_architecture_cli create_model <model_name>');
       return;
     }
 
     final modelName = StringUtils.toSnakeCase(rest.first);
     final className = StringUtils.toPascalCase(rest.first);
-    final featureName = StringUtils.toSnakeCase(argResults?['feature'] ?? modelName);
+    final projectDir = FileHelper.findProjectRoot();
+    final featureName =
+        StringUtils.toSnakeCase(argResults?['feature'] ?? modelName);
 
-    final uiEntityPath = p.join(Directory.current.path, 'lib/src', featureName, 'model', 'ui_entity', '${modelName}_ui_entity.dart');
-    final responsePath = p.join(Directory.current.path, 'lib/src', featureName, 'model', 'response', '${modelName}_response.dart');
+    final uiEntityPath = p.join(projectDir, 'lib/src', featureName, 'model',
+        'ui_entity', '${modelName}_ui_entity.dart');
+    final responsePath = p.join(projectDir, 'lib/src', featureName, 'model',
+        'response', '${modelName}_response.dart');
 
     // Create subdirectories if they do not exist
     final uiEntityDir = Directory(p.dirname(uiEntityPath));
@@ -70,8 +84,11 @@ class ${className}Response {
 }
 ''');
 
+    final useFvm =
+        FvmHelper.shouldUseFvm(explicitFvm: argResults?['fvm'] == true);
+    FvmHelper.runDart(['format', uiEntityPath, responsePath], useFvm: useFvm);
+
     print('Generated UI Entity: $uiEntityPath');
     print('Generated Response: $responsePath');
   }
 }
-

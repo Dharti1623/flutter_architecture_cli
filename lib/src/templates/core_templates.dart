@@ -437,7 +437,6 @@ abstract class BaseMapper<T, V> {
 }
 ''';
 
-
   static String get baseUiState => '''
 class BaseUiState<T> {
   dynamic error;
@@ -452,7 +451,7 @@ class BaseUiState<T> {
 
   bool isLoading() => _state == UIState.loading;
   bool isCompleted() => _state == UIState.completed;
-  bool isError() => _state == null || _state == UIState.error;
+  bool isError() => _state == UIState.error;
 
   @override
   String toString() => 'State is \$_state';
@@ -759,8 +758,8 @@ class AppLocalizations {
 
   AppLocalizations(this.locale);
 
-  static AppLocalizations of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =

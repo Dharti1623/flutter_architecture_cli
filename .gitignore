@@ -5,6 +5,7 @@
 .packages
 .pub/
 build/
+doc/
 
 # IDE files
 .idea/

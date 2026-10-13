@@ -1,5 +1,6 @@
 import 'package:test/test.dart';
 import 'package:flutter_architecture_cli/src/utils/string_utils.dart';
+import 'package:flutter_architecture_cli/src/utils/file_helper.dart';
 
 void main() {
   group('StringUtils Tests', () {
@@ -22,6 +23,16 @@ void main() {
     test('toKebabCase works correctly', () {
       expect(StringUtils.toKebabCase('UserProfile'), equals('user-profile'));
       expect(StringUtils.toKebabCase('user_profile'), equals('user-profile'));
+    });
+  });
+
+  group('FileHelper Tests', () {
+    test('findProjectRoot and getPackageName find current workspace pubspec',
+        () {
+      final root = FileHelper.findProjectRoot();
+      expect(root, isNotEmpty);
+      final pkgName = FileHelper.getPackageName(root);
+      expect(pkgName, equals('flutter_architecture_cli'));
     });
   });
 }

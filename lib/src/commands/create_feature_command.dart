@@ -3,51 +3,52 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 import '../utils/file_helper.dart';
 import '../utils/string_utils.dart';
+import '../utils/fvm_helper.dart';
 
 class CreateFeatureCommand extends Command {
   @override
   final String name = 'create_feature';
 
   @override
-  final String description = 'Generates a complete new Clean Architecture feature (data + presentation layers) in the current project.';
+  final String description =
+      'Generates a complete new Clean Architecture feature (data + presentation layers) in the current project.';
 
-  CreateFeatureCommand();
-
-  String _getPackageName() {
-    final file = File(p.join(Directory.current.path, 'pubspec.yaml'));
-    if (!file.existsSync()) return 'app';
-    final lines = file.readAsLinesSync();
-    for (final line in lines) {
-      if (line.trim().startsWith('name:')) {
-        return line.split('name:').last.trim();
-      }
-    }
-    return 'app';
+  CreateFeatureCommand() {
+    argParser.addFlag(
+      'fvm',
+      negatable: false,
+      help:
+          'Use FVM (Flutter Version Management) when formatting generated code.',
+    );
   }
 
   @override
   void run() {
     final rest = argResults?.rest;
     if (rest == null || rest.isEmpty) {
-      print('Error: Please specify the feature name. Usage: flutter_architecture_cli create_feature <feature_name>');
+      print(
+          'Error: Please specify the feature name. Usage: flutter_architecture_cli create_feature <feature_name>');
       return;
     }
 
+    final projectDir = FileHelper.findProjectRoot();
     final featureName = StringUtils.toSnakeCase(rest.first);
     final className = StringUtils.toPascalCase(rest.first);
-    final packageName = _getPackageName();
+    final packageName = FileHelper.getPackageName(projectDir);
 
-    print('Generating feature "$featureName" in feature-first Clean Architecture layout...');
+    print(
+        'Generating feature "$featureName" in feature-first Clean Architecture layout...');
 
     void write(String path, String content) {
       final replaced = content.replaceAll('{{package_name}}', packageName);
       FileHelper.writeFile(path, replaced);
     }
 
-    final featureDir = p.join(Directory.current.path, 'lib/src', featureName);
+    final featureDir = p.join(projectDir, 'lib/src', featureName);
 
     // 1. Model & DTO
-    final uiEntityPath = p.join(featureDir, 'model', 'ui_entity', '${featureName}_ui_entity.dart');
+    final uiEntityPath = p.join(
+        featureDir, 'model', 'ui_entity', '${featureName}_ui_entity.dart');
     write(uiEntityPath, '''
 class ${className}UiEntity {
   final int id;
@@ -60,7 +61,8 @@ class ${className}UiEntity {
 }
 ''');
 
-    final responsePath = p.join(featureDir, 'model', 'response', '${featureName}_response.dart');
+    final responsePath =
+        p.join(featureDir, 'model', 'response', '${featureName}_response.dart');
     write(responsePath, '''
 class ${className}Response {
   int? id;
@@ -92,7 +94,8 @@ class ${className}Response {
     }
 
     // 2. Mapper
-    final mapperPath = p.join(featureDir, 'mapper', '${featureName}_mapper.dart');
+    final mapperPath =
+        p.join(featureDir, 'mapper', '${featureName}_mapper.dart');
     write(mapperPath, '''
 import 'package:{{package_name}}/core/base/base_mapper.dart';
 import 'package:{{package_name}}/src/$featureName/model/ui_entity/${featureName}_ui_entity.dart';
@@ -114,7 +117,8 @@ class ${className}ResponseToUiEntity extends BaseMapper<${className}Response, ${
 ''');
 
     // 3. DataSource
-    final dataSourcePath = p.join(featureDir, 'data_source', '${featureName}_datasource.dart');
+    final dataSourcePath =
+        p.join(featureDir, 'data_source', '${featureName}_datasource.dart');
     write(dataSourcePath, '''
 import 'package:{{package_name}}/core/network/api_client.dart';
 import 'package:{{package_name}}/src/$featureName/model/response/${featureName}_response.dart';
@@ -134,7 +138,8 @@ class ${className}DataSource {
 ''');
 
     // 4. Repository
-    final repositoryPath = p.join(featureDir, 'repository', '${featureName}_repository.dart');
+    final repositoryPath =
+        p.join(featureDir, 'repository', '${featureName}_repository.dart');
     write(repositoryPath, '''
 import 'package:{{package_name}}/src/$featureName/data_source/${featureName}_datasource.dart';
 import 'package:{{package_name}}/src/$featureName/mapper/${featureName}_mapper.dart';
@@ -201,7 +206,8 @@ class ${className}Bloc extends BaseBloc {
 ''');
 
     // 7. Provider
-    final providerPath = p.join(featureDir, 'state', '${featureName}_provider.dart');
+    final providerPath =
+        p.join(featureDir, 'state', '${featureName}_provider.dart');
     write(providerPath, '''
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -218,7 +224,8 @@ class ${className}Provider {
 ''');
 
     // 8. Screen View
-    final screenPath = p.join(featureDir, 'presentation', 'view', '${featureName}_screen.dart');
+    final screenPath = p.join(
+        featureDir, 'presentation', 'view', '${featureName}_screen.dart');
     write(screenPath, '''
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -285,6 +292,12 @@ class ${className}Screen extends StatelessWidget {
       widgetDir.createSync(recursive: true);
     }
 
-    print('Feature "$featureName" generated successfully in feature-first layout.');
+    // Format generated files
+    final useFvm =
+        FvmHelper.shouldUseFvm(explicitFvm: argResults?['fvm'] == true);
+    FvmHelper.runDart(['format', featureDir], useFvm: useFvm);
+
+    print(
+        'Feature "$featureName" generated successfully in feature-first layout.');
   }
 }

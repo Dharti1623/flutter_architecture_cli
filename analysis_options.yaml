@@ -1,5 +1,9 @@
 include: package:lints/core.yaml
 
+analyzer:
+  exclude:
+    - test_app_dir/**
+
 linter:
   rules:
     - always_declare_return_types

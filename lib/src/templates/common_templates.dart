@@ -27,7 +27,8 @@ class AppText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String translatedText = AppLocalizations.of(context).translate(text);
+    final localizations = AppLocalizations.of(context);
+    String translatedText = localizations?.translate(text) ?? text;
     if (params != null) {
       params!.forEach((key, value) {
         translatedText = translatedText.replaceAll('{\$key}', value.toString());
