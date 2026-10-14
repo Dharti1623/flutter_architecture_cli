@@ -584,10 +584,115 @@ class DateFormatter {
 ''';
 
   static String get utilValidators => '''
+/// Reusable validation utility methods for FormFields and AppTextFields.
 class Validators {
-  static String? required(String? value) {
-    if (value == null || value.isEmpty) return 'This field is required';
+  Validators._();
+
+  /// Validates required/non-empty input.
+  static String? required(String? value, [String? message]) {
+    if (value == null || value.trim().isEmpty) {
+      return message ?? 'This field is required';
+    }
     return null;
+  }
+
+  /// Validates standard email address format.
+  static String? email(String? value, [String? message]) {
+    if (value == null || value.trim().isEmpty) return null;
+    final emailRegex = RegExp(r'^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}\$');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return message ?? 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  /// Validates phone numbers (10 to 12 digits, optional leading +).
+  static String? phone(String? value, [String? message]) {
+    if (value == null || value.trim().isEmpty) return null;
+    final phoneRegex = RegExp(r'^\\+?[0-9]{10,12}\$');
+    if (!phoneRegex.hasMatch(value.trim())) {
+      return message ?? 'Enter a valid phone number';
+    }
+    return null;
+  }
+
+  /// Validates minimum string length.
+  static String? minLength(String? value, int min, [String? message]) {
+    if (value == null || value.trim().isEmpty) return null;
+    if (value.trim().length < min) {
+      return message ?? 'Must be at least \$min characters';
+    }
+    return null;
+  }
+
+  /// Validates maximum string length.
+  static String? maxLength(String? value, int max, [String? message]) {
+    if (value == null || value.trim().isEmpty) return null;
+    if (value.trim().length > max) {
+      return message ?? 'Cannot exceed \$max characters';
+    }
+    return null;
+  }
+
+  /// Validates password strength (length, optional numbers, optional special characters).
+  static String? password(
+    String? value, {
+    int minLength = 6,
+    bool requireNumber = false,
+    bool requireSpecialChar = false,
+    String? message,
+  }) {
+    if (value == null || value.isEmpty) return null;
+    if (value.length < minLength) {
+      return message ?? 'Password must be at least \$minLength characters';
+    }
+    if (requireNumber && !RegExp(r'[0-9]').hasMatch(value)) {
+      return message ?? 'Password must contain at least one number';
+    }
+    if (requireSpecialChar && !RegExp(r'[!@#\\\$&*~]').hasMatch(value)) {
+      return message ?? 'Password must contain at least one special character';
+    }
+    return null;
+  }
+
+  /// Validates that confirmation value matches original value (e.g. Confirm Password).
+  static String? match(String? value, String? target, [String? message]) {
+    if (value != target) {
+      return message ?? 'Values do not match';
+    }
+    return null;
+  }
+
+  /// Validates numeric-only digits.
+  static String? numeric(String? value, [String? message]) {
+    if (value == null || value.trim().isEmpty) return null;
+    if (!RegExp(r'^[0-9]+\$').hasMatch(value.trim())) {
+      return message ?? 'Only numbers are allowed';
+    }
+    return null;
+  }
+
+  /// Validates standard URL format.
+  static String? url(String? value, [String? message]) {
+    if (value == null || value.trim().isEmpty) return null;
+    final uri = Uri.tryParse(value.trim());
+    if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) {
+      return message ?? 'Enter a valid URL';
+    }
+    return null;
+  }
+
+  /// Combines multiple validation functions into a single validator.
+  /// Runs sequentially and returns the first failing message.
+  static String? Function(String?) compose(
+      List<String? Function(String?)> validators) {
+    return (value) {
+      for (final validator in validators) {
+        final error = validator(value);
+        if (error != null) return error;
+      }
+      return null;
+    };
   }
 }
 ''';

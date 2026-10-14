@@ -28,6 +28,7 @@ A production-grade command-line tool designed to generate and scale clean archit
   - [7. Creating Core Services](#7-creating-core-services)
   - [8. Changing Bundle ID / Package Name](#8-changing-bundle-id--package-name)
 - [Architecture Flow](#architecture-flow)
+- [Form Validation Helper](#form-validation-helper)
 - [Roadmap / Future Goals](#roadmap--future-goals)
 - [Contributing](#contributing)
 - [Support & Donations](#support--donations)
@@ -146,8 +147,8 @@ Previously, developers who set up FVM using shell aliases (e.g., `alias flutter=
 * **Zero-Configuration Architecture Setup**: Instant scaffolding covering storage, networking, localizations, utility helpers, and dependency injection.
 * **Stream-Based State Management**: Seamless state handling inside Blocs using RxDart's `BehaviorSubject` and `CompositeSubscription`.
 * **Centralized Networking**: Custom `ApiClient` powered by `Dio` with automatic logging, secure token handling, and robust exception-handling interceptors.
-* **Unified UI State**: Standardized `BaseUiState` class for mapping screen loading, success, and error states.
 * **Common Widget Toolkit**: Reusable components such as `AppText`, `AppImage`, `AppTextField`, `AppButton`, `AppLoader`, `AppShimmer`, and `AppNetworkStatusWidget`.
+* **Built-in Validation Engine**: Comprehensive `Validators` utility covering `required`, `email`, `phone`, `minLength`, `maxLength`, `password`, `numeric`, `url`, and `compose(...)` validation chains.
 * **JSON-Based Localization**: Fully configured translations with convenient context translation extensions (`context.tr(...)`).
 * **FVM Compatible**: Effortless compatibility for teams managing Flutter versions with FVM.
 
@@ -503,6 +504,74 @@ The generated structure focuses on a single directional data flow:
 3. **Repository**: Requests data from `DataSource` and runs the mapped results up to the Bloc layer.
 4. **Bloc**: Standardizes UI state management by converting repository streams into `BaseUiState` (Loading -> Completed/Error) emitted via `BehaviorSubject`.
 5. **Presentation (View)**: Listens to the Bloc subjects using `StreamBuilder` and renders loading, success, or error screens automatically.
+
+---
+
+## Form Validation Helper
+
+Every scaffolded application includes `lib/core/utils/validators.dart`, providing a robust, pre-built validation engine. It integrates seamlessly with `AppTextField` and Flutter's standard `TextFormField`:
+
+```dart
+import 'package:my_app/core/utils/validators.dart';
+
+// 1. Direct validation functions
+AppTextField(
+  label: 'Email',
+  validator: Validators.email,
+)
+
+// 2. Custom error messages
+AppTextField(
+  label: 'Username',
+  validator: (val) => Validators.required(val, 'Username is required'),
+)
+
+// 3. Length constraints
+AppTextField(
+  label: 'Bio',
+  validator: (val) => Validators.maxLength(val, 150),
+)
+
+// 4. Password validation (with optional number & special character checks)
+AppTextField(
+  label: 'Password',
+  isPassword: true,
+  validator: (val) => Validators.password(
+    val,
+    minLength: 8,
+    requireNumber: true,
+    requireSpecialChar: true,
+  ),
+)
+
+// 5. Password Confirmation Matching
+AppTextField(
+  label: 'Confirm Password',
+  isPassword: true,
+  validator: (val) => Validators.match(val, passwordController.text, 'Passwords do not match'),
+)
+
+// 6. Chained validation rules (executes sequentially)
+AppTextField(
+  label: 'Work Email',
+  validator: Validators.compose([
+    Validators.required,
+    Validators.email,
+  ]),
+)
+```
+
+### Available Validator Methods:
+* `Validators.required(value, [message])` — Validates non-empty input.
+* `Validators.email(value, [message])` — Validates RFC-compliant email address format.
+* `Validators.phone(value, [message])` — Validates 10-12 digit phone numbers.
+* `Validators.minLength(value, min, [message])` — Enforces minimum character length.
+* `Validators.maxLength(value, max, [message])` — Enforces maximum character length limit.
+* `Validators.password(value, {minLength, requireNumber, requireSpecialChar, message})` — Validates password complexity.
+* `Validators.match(value, target, [message])` — Validates that two inputs match (e.g. password confirmation).
+* `Validators.numeric(value, [message])` — Ensures input contains only numeric digits.
+* `Validators.url(value, [message])` — Ensures valid HTTP/HTTPS URL syntax.
+* `Validators.compose([...])` — Sequentially executes a list of validator functions and returns the first error encountered.
 
 ---
 

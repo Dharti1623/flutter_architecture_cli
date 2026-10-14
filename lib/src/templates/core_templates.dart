@@ -165,8 +165,14 @@ class AssetPaths {
   static String get validationMessages => '''
 class ValidationMessages {
   static const String required = 'This field is required';
-  static const String invalidEmail = 'Enter a valid email';
+  static const String invalidEmail = 'Enter a valid email address';
   static const String invalidPhone = 'Enter a valid phone number';
+  static const String invalidPassword = 'Password must be at least 6 characters';
+  static const String passwordMismatch = 'Passwords do not match';
+  static const String minLength = 'Input is too short';
+  static const String maxLength = 'Input exceeds maximum length';
+  static const String invalidNumeric = 'Only numbers are allowed';
+  static const String invalidUrl = 'Enter a valid URL';
 }
 ''';
 

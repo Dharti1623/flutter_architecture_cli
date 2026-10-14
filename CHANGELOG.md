@@ -10,6 +10,7 @@
 * Fix smoke test generation so `flutter test` succeeds out of the box in new projects.
 * Fix `BaseUiState.isError()` to prevent uninitialized states from evaluating as errors.
 * Make `AppLocalizations` null-safe with fallback in `AppText` for widget tests.
+* Add comprehensive form validation helper (email, phone, password, minLength/maxLength, url, numeric, compose) in generated projects.
 
 ## 1.0.3
 
