@@ -7,6 +7,7 @@ import '../templates/feature_templates.dart';
 import '../templates/main_template.dart';
 import '../templates/pubspec_template.dart';
 import '../templates/localization_json_template.dart';
+import '../templates/bloc_templates.dart';
 import '../utils/file_helper.dart';
 import '../utils/string_utils.dart';
 import '../utils/fvm_helper.dart';
@@ -36,6 +37,16 @@ class CreateAppCommand extends Command {
       help:
           'The organization responsible for your new Flutter project, in reverse domain name notation.',
     );
+    argParser.addOption(
+      'state',
+      allowed: ['rxdart', 'bloc'],
+      help: 'State management architecture (rxdart or bloc).',
+    );
+    argParser.addFlag(
+      'bloc',
+      negatable: false,
+      help: 'Use flutter_bloc (Events & States) architecture.',
+    );
   }
 
   @override
@@ -52,6 +63,34 @@ class CreateAppCommand extends Command {
     final org = argResults?['org'] as String? ?? 'com.example';
     final explicitFvm = argResults?['fvm'] == true;
     final fvmVersion = argResults?['fvm-version'] as String?;
+
+    String stateChoice =
+        (argResults?['state'] as String?)?.toLowerCase() ?? '';
+    if (argResults?['bloc'] == true) {
+      stateChoice = 'bloc';
+    }
+
+    if (stateChoice.isEmpty) {
+      if (stdin.hasTerminal) {
+        print('');
+        print('Select State Management Architecture:');
+        print('  [1] RxDart + Provider (Stream-based) [Default]');
+        print('  [2] flutter_bloc (Event & State based BLoC)');
+        stdout.write('Choose an option (1 or 2) [default: 1]: ');
+        final input = stdin.readLineSync()?.trim();
+        if (input == '2' || input?.toLowerCase() == 'bloc') {
+          stateChoice = 'bloc';
+        } else {
+          stateChoice = 'rxdart';
+        }
+        print(
+            'Selected: ${stateChoice == "bloc" ? "flutter_bloc" : "RxDart + Provider"}\n');
+      } else {
+        stateChoice = 'rxdart';
+      }
+    }
+
+    final isBloc = stateChoice == 'bloc';
 
     final isFlutterAvailable = FvmHelper.isCommandAvailable('flutter');
     final isFvmAvailable = FvmHelper.isCommandAvailable('fvm');
@@ -124,7 +163,7 @@ class CreateAppCommand extends Command {
     // 1. Write pubspec.yaml
     write(
       p.join(targetDir, 'pubspec.yaml'),
-      PubspecTemplate.buildPubspec(appName),
+      PubspecTemplate.buildPubspec(appName, isBloc: isBloc),
     );
 
     // 2. Write localization JSON
@@ -323,30 +362,50 @@ class CreateAppCommand extends Command {
     write(p.join(targetDir, 'lib/core/utils/image_picker_helper.dart'),
         CommonTemplates.utilImagePickerHelper);
 
-    // 12. Write main.dart
-    write(p.join(targetDir, 'lib/main.dart'), MainTemplate.mainDart);
-
-    // 13. Write dummy users feature
-    write(
-        p.join(targetDir, 'lib/src/users/model/ui_entity/user_ui_entity.dart'),
-        FeatureTemplates.userModel);
-    write(p.join(targetDir, 'lib/src/users/model/response/user_response.dart'),
-        FeatureTemplates.userDto);
-    write(p.join(targetDir, 'lib/src/users/mapper/user_mapper.dart'),
-        FeatureTemplates.userMapper);
-    write(p.join(targetDir, 'lib/src/users/data_source/user_datasource.dart'),
-        FeatureTemplates.userDataSource);
-    write(p.join(targetDir, 'lib/src/users/repository/user_repository.dart'),
-        FeatureTemplates.userRepository);
-
-    write(p.join(targetDir, 'lib/src/users/state/user_state.dart'),
-        FeatureTemplates.userState);
-    write(p.join(targetDir, 'lib/src/users/bloc/user_bloc.dart'),
-        FeatureTemplates.userController);
-    write(p.join(targetDir, 'lib/src/users/state/user_provider.dart'),
-        FeatureTemplates.userProvider);
-    write(p.join(targetDir, 'lib/src/users/presentation/view/user_screen.dart'),
-        FeatureTemplates.userScreen);
+    // 12. Write main.dart and dummy users feature
+    if (isBloc) {
+      write(p.join(targetDir, 'lib/main.dart'), BlocTemplates.mainDart);
+      write(
+          p.join(targetDir, 'lib/src/users/model/ui_entity/user_ui_entity.dart'),
+          FeatureTemplates.userModel);
+      write(p.join(targetDir, 'lib/src/users/model/response/user_response.dart'),
+          FeatureTemplates.userDto);
+      write(p.join(targetDir, 'lib/src/users/mapper/user_mapper.dart'),
+          FeatureTemplates.userMapper);
+      write(p.join(targetDir, 'lib/src/users/data_source/user_datasource.dart'),
+          FeatureTemplates.userDataSource);
+      write(p.join(targetDir, 'lib/src/users/repository/user_repository.dart'),
+          BlocTemplates.userRepository);
+      write(p.join(targetDir, 'lib/src/users/bloc/user_event.dart'),
+          BlocTemplates.userEvent);
+      write(p.join(targetDir, 'lib/src/users/bloc/user_state.dart'),
+          BlocTemplates.userState);
+      write(p.join(targetDir, 'lib/src/users/bloc/user_bloc.dart'),
+          BlocTemplates.userBloc);
+      write(p.join(targetDir, 'lib/src/users/presentation/view/user_screen.dart'),
+          BlocTemplates.userScreen);
+    } else {
+      write(p.join(targetDir, 'lib/main.dart'), MainTemplate.mainDart);
+      write(
+          p.join(targetDir, 'lib/src/users/model/ui_entity/user_ui_entity.dart'),
+          FeatureTemplates.userModel);
+      write(p.join(targetDir, 'lib/src/users/model/response/user_response.dart'),
+          FeatureTemplates.userDto);
+      write(p.join(targetDir, 'lib/src/users/mapper/user_mapper.dart'),
+          FeatureTemplates.userMapper);
+      write(p.join(targetDir, 'lib/src/users/data_source/user_datasource.dart'),
+          FeatureTemplates.userDataSource);
+      write(p.join(targetDir, 'lib/src/users/repository/user_repository.dart'),
+          FeatureTemplates.userRepository);
+      write(p.join(targetDir, 'lib/src/users/state/user_state.dart'),
+          FeatureTemplates.userState);
+      write(p.join(targetDir, 'lib/src/users/bloc/user_bloc.dart'),
+          FeatureTemplates.userController);
+      write(p.join(targetDir, 'lib/src/users/state/user_provider.dart'),
+          FeatureTemplates.userProvider);
+      write(p.join(targetDir, 'lib/src/users/presentation/view/user_screen.dart'),
+          FeatureTemplates.userScreen);
+    }
 
     // 14. Write working smoke test replacing default counter test
     write(

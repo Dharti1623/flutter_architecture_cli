@@ -1,3 +1,13 @@
+## 1.0.5
+
+* Add support for `flutter_bloc` state management architecture alongside `RxDart + Provider`.
+* Add interactive terminal selection menu when running `flutter_architecture_cli create <app_name>`.
+* Add `--state <rxdart|bloc>` and `--bloc` flags to `create` and `create_feature` commands.
+* Add smart architecture auto-detection in `create_feature`: automatically detects `flutter_bloc` in `pubspec.yaml` and generates BLoC events, states, bloc, and presentation widgets.
+* Generate complete BLoC pattern: `_event.dart`, `_state.dart`, `_bloc.dart` extending `Bloc<Event, State>`, and UI with `BlocProvider` & `BlocBuilder`.
+* Include `rxdart` dependency in BLoC project templates to support core `BaseBloc`.
+* Unit tests covering both RxDart and flutter_bloc code generation templates.
+
 ## 1.0.4
 
 * Add full FVM (Flutter Version Management) support across all commands with `--fvm` and `--fvm-version` flags.

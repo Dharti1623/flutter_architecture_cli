@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import '../utils/file_helper.dart';
 import '../utils/string_utils.dart';
 import '../utils/fvm_helper.dart';
+import '../templates/bloc_templates.dart';
 
 class CreateFeatureCommand extends Command {
   @override
@@ -19,6 +20,16 @@ class CreateFeatureCommand extends Command {
       negatable: false,
       help:
           'Use FVM (Flutter Version Management) when formatting generated code.',
+    );
+    argParser.addOption(
+      'state',
+      allowed: ['rxdart', 'bloc'],
+      help: 'State management architecture (rxdart or bloc).',
+    );
+    argParser.addFlag(
+      'bloc',
+      negatable: false,
+      help: 'Generate feature using flutter_bloc architecture.',
     );
   }
 
@@ -36,8 +47,19 @@ class CreateFeatureCommand extends Command {
     final className = StringUtils.toPascalCase(rest.first);
     final packageName = FileHelper.getPackageName(projectDir);
 
+    final pubspecFile = File(p.join(projectDir, 'pubspec.yaml'));
+    bool isBloc = argResults?['bloc'] == true ||
+        (argResults?['state'] as String?)?.toLowerCase() == 'bloc';
+
+    if (!isBloc && argResults?['state'] == null && pubspecFile.existsSync()) {
+      final content = pubspecFile.readAsStringSync();
+      if (content.contains('flutter_bloc:')) {
+        isBloc = true;
+      }
+    }
+
     print(
-        'Generating feature "$featureName" in feature-first Clean Architecture layout...');
+        'Generating feature "$featureName" using ${isBloc ? "flutter_bloc" : "RxDart + Provider"} architecture...');
 
     void write(String path, String content) {
       final replaced = content.replaceAll('{{package_name}}', packageName);
@@ -137,10 +159,49 @@ class ${className}DataSource {
 }
 ''');
 
-    // 4. Repository
-    final repositoryPath =
-        p.join(featureDir, 'repository', '${featureName}_repository.dart');
-    write(repositoryPath, '''
+    if (isBloc) {
+      // 4. Repository (async Future-based for BLoC)
+      final repositoryPath =
+          p.join(featureDir, 'repository', '${featureName}_repository.dart');
+      write(repositoryPath, '''
+import 'package:{{package_name}}/src/$featureName/data_source/${featureName}_datasource.dart';
+import 'package:{{package_name}}/src/$featureName/mapper/${featureName}_mapper.dart';
+import 'package:{{package_name}}/src/$featureName/model/ui_entity/${featureName}_ui_entity.dart';
+
+class ${className}Repository {
+  final ${className}DataSource _dataSource = ${className}DataSource();
+
+  Future<List<${className}UiEntity>> getData() async {
+    final dtos = await _dataSource.getData().first;
+    return ${className}ResponseToUiEntity().mapList(dtos);
+  }
+}
+''');
+
+      // 5. Event
+      final eventPath = p.join(featureDir, 'bloc', '${featureName}_event.dart');
+      write(eventPath, BlocTemplates.featureEvent(className));
+
+      // 6. State
+      final statePath = p.join(featureDir, 'bloc', '${featureName}_state.dart');
+      write(statePath,
+          BlocTemplates.featureState(className, featureName, packageName));
+
+      // 7. Bloc
+      final blocPath = p.join(featureDir, 'bloc', '${featureName}_bloc.dart');
+      write(blocPath,
+          BlocTemplates.featureBloc(className, featureName, packageName));
+
+      // 8. Screen View (using BlocProvider & BlocBuilder)
+      final screenPath = p.join(
+          featureDir, 'presentation', 'view', '${featureName}_screen.dart');
+      write(screenPath,
+          BlocTemplates.featureScreen(className, featureName, packageName));
+    } else {
+      // 4. Repository (Stream-based for RxDart)
+      final repositoryPath =
+          p.join(featureDir, 'repository', '${featureName}_repository.dart');
+      write(repositoryPath, '''
 import 'package:{{package_name}}/src/$featureName/data_source/${featureName}_datasource.dart';
 import 'package:{{package_name}}/src/$featureName/mapper/${featureName}_mapper.dart';
 import 'package:{{package_name}}/src/$featureName/model/ui_entity/${featureName}_ui_entity.dart';
@@ -154,9 +215,10 @@ class ${className}Repository {
 }
 ''');
 
-    // 5. State Class
-    final statePath = p.join(featureDir, 'state', '${featureName}_state.dart');
-    write(statePath, '''
+      // 5. State Class
+      final statePath =
+          p.join(featureDir, 'state', '${featureName}_state.dart');
+      write(statePath, '''
 import 'package:{{package_name}}/core/base/base_ui_state.dart';
 import 'package:{{package_name}}/src/$featureName/model/ui_entity/${featureName}_ui_entity.dart';
 
@@ -171,9 +233,9 @@ class Get${className}State extends BaseUiState<List<${className}UiEntity>> {
 }
 ''');
 
-    // 6. Bloc
-    final blocPath = p.join(featureDir, 'bloc', '${featureName}_bloc.dart');
-    write(blocPath, '''
+      // 6. Bloc
+      final blocPath = p.join(featureDir, 'bloc', '${featureName}_bloc.dart');
+      write(blocPath, '''
 import 'package:rxdart/rxdart.dart';
 import 'package:{{package_name}}/core/base/base_bloc.dart';
 import 'package:{{package_name}}/src/$featureName/repository/${featureName}_repository.dart';
@@ -205,10 +267,10 @@ class ${className}Bloc extends BaseBloc {
 }
 ''');
 
-    // 7. Provider
-    final providerPath =
-        p.join(featureDir, 'state', '${featureName}_provider.dart');
-    write(providerPath, '''
+      // 7. Provider
+      final providerPath =
+          p.join(featureDir, 'state', '${featureName}_provider.dart');
+      write(providerPath, '''
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:{{package_name}}/src/$featureName/bloc/${featureName}_bloc.dart';
@@ -223,10 +285,10 @@ class ${className}Provider {
 }
 ''');
 
-    // 8. Screen View
-    final screenPath = p.join(
-        featureDir, 'presentation', 'view', '${featureName}_screen.dart');
-    write(screenPath, '''
+      // 8. Screen View
+      final screenPath = p.join(
+          featureDir, 'presentation', 'view', '${featureName}_screen.dart');
+      write(screenPath, '''
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:{{package_name}}/common/widgets/app_text.dart';
@@ -285,6 +347,7 @@ class ${className}Screen extends StatelessWidget {
   }
 }
 ''');
+    }
 
     // Create presentation/widget directory
     final widgetDir = Directory(p.join(featureDir, 'presentation', 'widget'));

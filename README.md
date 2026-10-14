@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform Support](https://img.shields.io/badge/platform-android%20%7C%20ios%20%7C%20macos%20%7C%20web%20%7C%20linux%20%7C%20windows-blue.svg)](#)
 
-A production-grade command-line tool designed to generate and scale clean architecture codebases in Flutter. It eliminates repetitive setup, enforcing a modular, highly scalable, and team-friendly project structure powered by RxDart streams and Provider.
+A production-grade command-line tool designed to generate and scale clean architecture codebases in Flutter. It eliminates repetitive setup, enforcing a modular, highly scalable, and team-friendly project structure with your choice of state management: **flutter_bloc** (Event & State-driven) or **RxDart + Provider** (Stream-driven).
 
 > [!TIP]
 > Read the complete setup and detailed architectural guide on Medium: **[Stop Writing Boilerplate: Scaffold a Flutter Clean Architecture App in 60 Seconds!](https://medium.com/@dharti6196/stop-writing-boilerplate-scaffold-a-flutter-clean-architecture-app-in-60-seconds-4b1df80397b0)**
@@ -145,7 +145,8 @@ Previously, developers who set up FVM using shell aliases (e.g., `alias flutter=
 ## Features
 
 * **Zero-Configuration Architecture Setup**: Instant scaffolding covering storage, networking, localizations, utility helpers, and dependency injection.
-* **Stream-Based State Management**: Seamless state handling inside Blocs using RxDart's `BehaviorSubject` and `CompositeSubscription`.
+* **Dual State Management Support**: Full out-of-the-box support for both **flutter_bloc** (`Bloc<Event, State>`, `BlocProvider`, `BlocBuilder`) and **RxDart + Provider** (`BehaviorSubject` stream pipelines).
+* **Smart Architecture Auto-Detection**: Commands like `create_feature` automatically inspect your project's `pubspec.yaml` to detect whether you're using BLoC or RxDart and generate matching code with 0 configuration.
 * **Centralized Networking**: Custom `ApiClient` powered by `Dio` with automatic logging, secure token handling, and robust exception-handling interceptors.
 * **Common Widget Toolkit**: Reusable components such as `AppText`, `AppImage`, `AppTextField`, `AppButton`, `AppLoader`, `AppShimmer`, and `AppNetworkStatusWidget`.
 * **Built-in Validation Engine**: Comprehensive `Validators` utility covering `required`, `email`, `phone`, `minLength`, `maxLength`, `password`, `numeric`, `url`, and `compose(...)` validation chains.
@@ -203,7 +204,16 @@ Below is the detailed reference for all **8 available commands**.
 
 ### 1. `create` — Scaffold a New Clean Architecture App
 
-Creates a complete, production-ready Flutter application with all architectural layers, common widgets, networking, storage, localization, and a working smoke test.
+Creates a complete, production-ready Flutter application with all architectural layers, common widgets, networking, storage, localization, and a working smoke test. Supports both **flutter_bloc** and **RxDart + Provider**.
+
+#### Interactive State Management Selection:
+When running in an interactive terminal, the CLI prompts you to select your preferred architecture:
+```text
+Select State Management Architecture:
+  [1] RxDart + Provider (Stream-based) [Default]
+  [2] flutter_bloc (Event & State based BLoC)
+Choose an option (1 or 2) [default: 1]:
+```
 
 #### Syntax & Options:
 ```bash
@@ -211,6 +221,8 @@ Creates a complete, production-ready Flutter application with all architectural 
 flutter_architecture_cli create <app_name> [options]
 
 # Options:
+#   --state         State management architecture: 'rxdart' or 'bloc' (default: rxdart)
+#   --bloc          Shortcut flag to scaffold using flutter_bloc
 #   --org           Organization reverse-domain (default: com.example)
 #   --fvm           Use FVM (Flutter Version Management) for creation & formatting
 #   --fvm-version   Pin a specific Flutter SDK version in FVM (e.g., 3.22.0)
@@ -218,25 +230,33 @@ flutter_architecture_cli create <app_name> [options]
 
 #### Examples:
 ```bash
-# Standard Flutter
+# Interactive creation (prompts for architecture selection)
 flutter_architecture_cli create my_shop_app
 
+# Scaffold with flutter_bloc directly (skips prompt)
+flutter_architecture_cli create my_shop_app --state bloc
+# or
+flutter_architecture_cli create my_shop_app --bloc
+
+# Scaffold with RxDart + Provider directly
+flutter_architecture_cli create my_shop_app --state rxdart
+
 # With custom package / bundle ID domain
-flutter_architecture_cli create my_shop_app --org com.mycompany
+flutter_architecture_cli create my_shop_app --org com.mycompany --bloc
 
 # With FVM
 flutter_architecture_cli create my_shop_app --fvm
 
 # With FVM and pinned Flutter version
-flutter_architecture_cli create my_shop_app --fvm --fvm-version 3.24.0
+flutter_architecture_cli create my_shop_app --fvm --fvm-version 3.24.0 --bloc
 ```
 
 #### What it generates:
 - Full Clean Architecture folder structure (`lib/common/`, `lib/core/`, `lib/src/users/`).
 - `lib/main.dart` with pre-configured DI, Localization, and Theme.
-- A functional dummy `users` feature showcasing the full Bloc + DataSource + Repository + Mapper + UI Entity data flow.
+- A functional dummy `users` feature showcasing the full Bloc + DataSource + Repository + Mapper + UI Entity data flow (using `flutter_bloc` or `RxDart` based on your choice).
 - A passing `test/widget_test.dart` smoke test.
-- Automatically adds `flutter_architecture_cli: ^1.0.4` to `dev_dependencies` inside `pubspec.yaml`.
+- Automatically adds `flutter_architecture_cli: ^1.0.5` to `dev_dependencies` inside `pubspec.yaml`.
 
 ---
 
@@ -244,24 +264,60 @@ flutter_architecture_cli create my_shop_app --fvm --fvm-version 3.24.0
 
 Instantly creates an entire feature-first folder structure with state management, data, and presentation layers wired together.
 
+> [!TIP]
+> **Smart Architecture Auto-Detection**: `create_feature` inspects your `pubspec.yaml`. If your project includes `flutter_bloc`, it automatically generates a complete BLoC pattern (`_event.dart`, `_state.dart`, `_bloc.dart`, and `BlocBuilder` view). Otherwise, it generates the RxDart stream pattern! You can also explicitly pass `--state bloc` or `--bloc`.
+
 #### Syntax & Options:
 ```bash
-flutter_architecture_cli create_feature <feature_name> [--fvm]
+flutter_architecture_cli create_feature <feature_name> [options]
+
+# Options:
+#   --state         State management override ('rxdart' or 'bloc')
+#   --bloc          Shortcut flag to force flutter_bloc feature generation
+#   --fvm           Format generated code using FVM
 ```
 
 #### Examples:
 ```bash
-# Global CLI
-flutter_architecture_cli create_feature products
-
-# As Dev Dependency (Standard)
+# Auto-detects architecture from pubspec.yaml:
 dart run flutter_architecture_cli create_feature products
 
-# As Dev Dependency (FVM)
+# Explicitly create as flutter_bloc:
+dart run flutter_architecture_cli create_feature products --bloc
+
+# Explicitly create as RxDart:
+dart run flutter_architecture_cli create_feature products --state rxdart
+
+# With FVM
 fvm dart run flutter_architecture_cli create_feature products
 ```
 
-#### What it generates inside `lib/src/<feature_name>/`:
+#### Generated Structure with `flutter_bloc`:
+```text
+lib/src/products/
+├── bloc/
+│   ├── products_bloc.dart          # Bloc<ProductsEvent, ProductsState>
+│   ├── products_event.dart         # FetchProductsEvent, etc.
+│   └── products_state.dart         # BaseUiState subclass with initial/loading/completed/error
+├── data_source/
+│   └── products_datasource.dart    # ApiClient data layer
+├── mapper/
+│   └── products_mapper.dart        # Transforms Response DTO -> UiEntity
+├── model/
+│   ├── request/                    # Request parameter models placeholder
+│   ├── response/
+│   │   └── products_response.dart  # Raw JSON network DTO with fromJson/toJson
+│   └── ui_entity/
+│       └── products_ui_entity.dart # Clean UI domain entity
+├── presentation/
+│   ├── view/
+│   │   └── products_screen.dart    # BlocProvider + BlocBuilder view with Loader & Error
+│   └── widget/                     # Custom widgets for this feature
+└── repository/
+    └── products_repository.dart    # Bridge between DataSource & Bloc
+```
+
+#### Generated Structure with `RxDart + Provider`:
 ```text
 lib/src/products/
 ├── bloc/
@@ -285,18 +341,6 @@ lib/src/products/
 └── state/
     ├── products_state.dart         # BaseUiState subclass (loading, completed, error)
     └── products_provider.dart      # Provider DI wire-up
-```
-
-#### How to use the generated feature in your app:
-Wrap the screen in its feature provider (e.g., in `main.dart` or your route navigator):
-```dart
-import 'package:my_app/src/products/presentation/view/products_screen.dart';
-import 'package:my_app/src/products/state/products_provider.dart';
-
-MultiProvider(
-  providers: ProductsProvider.providers,
-  child: const ProductsScreen(),
-);
 ```
 
 ---
@@ -578,10 +622,10 @@ AppTextField(
 ## Roadmap / Future Goals
 
 We plan to expand the CLI tool to support multiple popular state management architectures:
-* **flutter_bloc**: Support for Bloc/Cubit architectures.
-* **Riverpod**: Support for modern declarative state management and providers.
-* **GetX**: Support for lightweight and high-performance reactive programming.
-* **Custom templates**: Ability to load user-defined boilerplate structures.
+* [x] **flutter_bloc**: Support for Bloc/Event/State architecture with `BlocBuilder` and `BlocProvider` *(Added in v1.0.5)*.
+* [ ] **Riverpod**: Support for modern declarative state management and providers.
+* [ ] **GetX**: Support for lightweight and high-performance reactive programming.
+* [ ] **Custom templates**: Ability to load user-defined boilerplate structures.
 
 ---
 
