@@ -192,105 +192,305 @@ lib/
 
 ## Usage Guide
 
-> If using as a dev dependency, prefix commands with `dart run` (or `fvm dart run`). If globally activated, run `flutter_architecture_cli` directly.
+You can run commands in two ways depending on how you installed the package:
+* **As a project dev dependency (Recommended)**: Prefix with `dart run flutter_architecture_cli` (or `fvm dart run flutter_architecture_cli`).
+* **Globally activated**: Run `flutter_architecture_cli <command>` directly.
 
-### 1. Creating a New Application
-Generate a fully bootstrapped Flutter project matching the architecture style:
+Below is the detailed reference for all **8 available commands**.
 
+---
+
+### 1. `create` — Scaffold a New Clean Architecture App
+
+Creates a complete, production-ready Flutter application with all architectural layers, common widgets, networking, storage, localization, and a working smoke test.
+
+#### Syntax & Options:
 ```bash
-# Standard
-flutter_architecture_cli create <app_name>
+# Basic syntax
+flutter_architecture_cli create <app_name> [options]
 
-# With custom organization domain
-flutter_architecture_cli create <app_name> --org com.company
+# Options:
+#   --org           Organization reverse-domain (default: com.example)
+#   --fvm           Use FVM (Flutter Version Management) for creation & formatting
+#   --fvm-version   Pin a specific Flutter SDK version in FVM (e.g., 3.22.0)
+```
+
+#### Examples:
+```bash
+# Standard Flutter
+flutter_architecture_cli create my_shop_app
+
+# With custom package / bundle ID domain
+flutter_architecture_cli create my_shop_app --org com.mycompany
 
 # With FVM
-flutter_architecture_cli create <app_name> --fvm
+flutter_architecture_cli create my_shop_app --fvm
 
-# With FVM and pinned SDK version
-flutter_architecture_cli create <app_name> --fvm --fvm-version 3.22.0
-```
-*Example:*
-```bash
-flutter_architecture_cli create my_awesome_app
+# With FVM and pinned Flutter version
+flutter_architecture_cli create my_shop_app --fvm --fvm-version 3.24.0
 ```
 
-### 2. Creating a Feature
-Instantly scaffold a complete feature directory with all sub-layers (`bloc`, `data_source`, `mapper`, `model/request`, `model/response`, `model/ui_entity`, `presentation/view`, `presentation/widget`, `repository`, `state`):
+#### What it generates:
+- Full Clean Architecture folder structure (`lib/common/`, `lib/core/`, `lib/src/users/`).
+- `lib/main.dart` with pre-configured DI, Localization, and Theme.
+- A functional dummy `users` feature showcasing the full Bloc + DataSource + Repository + Mapper + UI Entity data flow.
+- A passing `test/widget_test.dart` smoke test.
+- Automatically adds `flutter_architecture_cli: ^1.0.4` to `dev_dependencies` inside `pubspec.yaml`.
 
+---
+
+### 2. `create_feature` — Generate a Complete Feature Layer
+
+Instantly creates an entire feature-first folder structure with state management, data, and presentation layers wired together.
+
+#### Syntax & Options:
 ```bash
-flutter_architecture_cli create_feature <feature_name>
+flutter_architecture_cli create_feature <feature_name> [--fvm]
 ```
-*Example:*
+
+#### Examples:
 ```bash
+# Global CLI
 flutter_architecture_cli create_feature products
+
+# As Dev Dependency (Standard)
+dart run flutter_architecture_cli create_feature products
+
+# As Dev Dependency (FVM)
+fvm dart run flutter_architecture_cli create_feature products
 ```
 
-### 3. Creating a Screen
-Add a new screen to the presentation layer of a specific feature:
-
-```bash
-flutter_architecture_cli create_screen <screen_name> -f <feature_name>
-```
-*Example:*
-```bash
-flutter_architecture_cli create_screen product_detail -f products
-```
-
-### 4. Creating Models
-Generate model response DTOs and matching UI Entity classes:
-
-```bash
-flutter_architecture_cli create_model <model_name> -f <feature_name>
-```
-*Example:*
-```bash
-flutter_architecture_cli create_model category -f products
-```
-
-### 5. Creating Data Sources
-Generate a data source class in the specified feature:
-
-```bash
-flutter_architecture_cli create_datasource <name> -f <feature_name>
-```
-*Example:*
-```bash
-flutter_architecture_cli create_datasource product -f products
+#### What it generates inside `lib/src/<feature_name>/`:
+```text
+lib/src/products/
+├── bloc/
+│   └── products_bloc.dart          # RxDart BehaviorSubject state emitter
+├── data_source/
+│   └── products_datasource.dart    # ApiClient data layer
+├── mapper/
+│   └── products_mapper.dart        # Transforms Response DTO -> UiEntity
+├── model/
+│   ├── request/                    # Request parameter models placeholder
+│   ├── response/
+│   │   └── products_response.dart  # Raw JSON network DTO with fromJson/toJson
+│   └── ui_entity/
+│       └── products_ui_entity.dart # Clean UI domain entity
+├── presentation/
+│   ├── view/
+│   │   └── products_screen.dart    # StreamBuilder view with AppText, Loader & ErrorWidget
+│   └── widget/                     # Custom widgets for this feature
+├── repository/
+│   └── products_repository.dart    # Bridge between DataSource & Bloc
+└── state/
+    ├── products_state.dart         # BaseUiState subclass (loading, completed, error)
+    └── products_provider.dart      # Provider DI wire-up
 ```
 
-### 6. Creating Repositories
-Generate a repository class to bridge your data source and domain layer (automatically links to existing feature data sources):
+#### How to use the generated feature in your app:
+Wrap the screen in its feature provider (e.g., in `main.dart` or your route navigator):
+```dart
+import 'package:my_app/src/products/presentation/view/products_screen.dart';
+import 'package:my_app/src/products/state/products_provider.dart';
 
-```bash
-flutter_architecture_cli create_repository <name> -f <feature_name>
-```
-*Example:*
-```bash
-flutter_architecture_cli create_repository product -f products
+MultiProvider(
+  providers: ProductsProvider.providers,
+  child: const ProductsScreen(),
+);
 ```
 
-### 7. Creating Core Services
-Generate a singleton service in `lib/core/services/`:
+---
 
+### 3. `create_screen` — Add a Presentation Screen
+
+Adds a new screen widget to an existing or new feature's presentation layer.
+
+#### Syntax & Options:
 ```bash
-flutter_architecture_cli create_service <service_name>
+flutter_architecture_cli create_screen <screen_name> -f <feature_name> [--fvm]
+
+# Options:
+#   -f, --feature   The target feature folder inside lib/src/ (defaults to screen name)
+#   --fvm           Format generated code using FVM
 ```
-*Example:*
+
+#### Examples:
 ```bash
+# Create "checkout_screen.dart" inside lib/src/cart/presentation/view/
+flutter_architecture_cli create_screen checkout -f cart
+
+# Using dart run
+dart run flutter_architecture_cli create_screen profile_settings -f profile
+
+# Using FVM
+fvm dart run flutter_architecture_cli create_screen product_details -f products
+```
+
+#### What it generates:
+- Generates `lib/src/<feature>/presentation/view/<screen_name>_screen.dart`.
+- Includes a clean `StatelessWidget` with `Scaffold`, `AppBar`, `AppText`, and a static `routeName`.
+
+---
+
+### 4. `create_model` — Generate UI Entity and Response DTO
+
+Generates both the UI Entity (domain model) and the Response Model (with JSON serialization).
+
+#### Syntax & Options:
+```bash
+flutter_architecture_cli create_model <model_name> -f <feature_name> [--fvm]
+
+# Options:
+#   -f, --feature   The target feature folder inside lib/src/
+#   --fvm           Format generated code using FVM
+```
+
+#### Examples:
+```bash
+# Generate product_ui_entity.dart and product_response.dart
+flutter_architecture_cli create_model product -f products
+
+# Using dart run
+dart run flutter_architecture_cli create_model order -f orders
+```
+
+#### What it generates:
+1. `lib/src/<feature>/model/ui_entity/<model_name>_ui_entity.dart` — Clean model for UI consumption.
+2. `lib/src/<feature>/model/response/<model_name>_response.dart` — Network DTO with `fromJson()` and `toJson()` methods.
+
+---
+
+### 5. `create_datasource` — Generate an API Data Source
+
+Creates an API data source class wired with the singleton `ApiClient`.
+
+#### Syntax & Options:
+```bash
+flutter_architecture_cli create_datasource <name> -f <feature_name> [--fvm]
+
+# Options:
+#   -f, --feature   The target feature folder inside lib/src/
+#   --fvm           Format generated code using FVM
+```
+
+#### Examples:
+```bash
+# Generate payment_datasource.dart in lib/src/payment/data_source/
+flutter_architecture_cli create_datasource payment -f payment
+
+# Using dart run
+dart run flutter_architecture_cli create_datasource order -f orders
+```
+
+#### What it generates:
+- `lib/src/<feature>/data_source/<name>_datasource.dart` with `final ApiClient _apiClient = ApiClient.instance;`.
+
+---
+
+### 6. `create_repository` — Generate a Repository
+
+Generates a repository class bridging your DataSource and Bloc. It automatically scans your feature directory and links to any existing data sources to avoid manual import wiring.
+
+#### Syntax & Options:
+```bash
+flutter_architecture_cli create_repository <name> -f <feature_name> [--fvm]
+
+# Options:
+#   -f, --feature   The target feature folder inside lib/src/
+#   --fvm           Format generated code using FVM
+```
+
+#### Examples:
+```bash
+# Generate cart_repository.dart in lib/src/cart/repository/
+flutter_architecture_cli create_repository cart -f cart
+
+# Using dart run
+dart run flutter_architecture_cli create_repository order -f orders
+```
+
+#### What it generates:
+- `lib/src/<feature>/repository/<name>_repository.dart`
+- Automatically discovers and injects the feature's data source:
+  ```dart
+  import 'package:my_app/src/cart/data_source/cart_datasource.dart';
+
+  class CartRepository {
+    final CartDataSource _dataSource = CartDataSource();
+    // Add repository operations
+  }
+  ```
+
+---
+
+### 7. `create_service` — Generate a Core Singleton Service
+
+Generates a core application service using the thread-safe singleton pattern in `lib/core/services/`.
+
+#### Syntax & Options:
+```bash
+flutter_architecture_cli create_service <service_name> [--fvm]
+
+# Options:
+#   --fvm   Format generated code using FVM
+```
+
+#### Examples:
+```bash
+# Create auth_service.dart in lib/core/services/
 flutter_architecture_cli create_service auth
+
+# Create analytics_service.dart using dart run
+dart run flutter_architecture_cli create_service analytics
+
+# Using FVM
+fvm dart run flutter_architecture_cli create_service notification
 ```
 
-### 8. Changing Bundle ID / Package Name
-Change the Android package name and iOS bundle identifier across `build.gradle`, `build.gradle.kts`, `AndroidManifest.xml`, `MainActivity`, and `project.pbxproj`:
+#### What it generates:
+`lib/core/services/<service_name>_service.dart`:
+```dart
+class AuthService {
+  static final AuthService _instance = AuthService._internal();
+  factory AuthService() => _instance;
+  AuthService._internal();
 
+  Future<void> init() async {
+    // Service initialization logic
+  }
+}
+```
+
+---
+
+### 8. `change_bundle_id` — Rename Package Name / Bundle ID
+
+Safely updates the Android application ID/namespace and iOS bundle identifier across the entire project in one step.
+
+#### Syntax & Options:
 ```bash
 flutter_architecture_cli change_bundle_id <new_bundle_id>
 ```
-*Example:*
+
+#### Examples:
 ```bash
-flutter_architecture_cli change_bundle_id com.company.myapp
+# Global CLI
+flutter_architecture_cli change_bundle_id com.mycompany.shopapp
+
+# As Dev Dependency (Standard)
+dart run flutter_architecture_cli change_bundle_id com.mycompany.shopapp
+
+# As Dev Dependency (FVM)
+fvm dart run flutter_architecture_cli change_bundle_id com.mycompany.shopapp
 ```
+
+#### What it updates automatically:
+- **Android**:
+  - `android/app/build.gradle` (`applicationId`, `namespace`).
+  - `android/app/build.gradle.kts` (Kotlin DSL support).
+  - `android/app/src/main/AndroidManifest.xml` (`package="..."`).
+  - Moves `MainActivity.kt` or `MainActivity.java` to the new package directory structure and cleans up old empty folders.
+- **iOS**:
+  - `ios/Runner.xcodeproj/project.pbxproj` (`PRODUCT_BUNDLE_IDENTIFIER`).
 
 ---
 
